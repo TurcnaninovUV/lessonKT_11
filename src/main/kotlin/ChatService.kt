@@ -10,7 +10,6 @@ object ChatService {
             messageList.add(Message(text = message, senderId = sender.idUser,
                     recipientId = recipient.idUser, id = messageList.last().id.plus(1)))
         }
-
         val messageFilter = messageList.filter { messageIn ->
             messageIn.recipientId == recipient.idUser
         }
@@ -72,5 +71,4 @@ object ChatService {
             }
         }
     }
-
 }
