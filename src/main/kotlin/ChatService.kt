@@ -3,28 +3,31 @@ object ChatService {
     private var messageList = mutableListOf<Message>()
 
     fun sendMessage(message: String, recipient: User, sender: User) {
-        val newMessage = if (messageList.isEmpty()) {
-            Message(text = message, senderId = sender.idUser, recipientId = recipient.idUser, id = 1)
+        if (messageList.isEmpty()) {
+            messageList.add(Message(text = message, senderId = sender.idUser,
+                    recipientId = recipient.idUser, id = 1))
         } else {
-            Message(text = message, senderId = sender.idUser,
-                    recipientId = recipient.idUser, id = messageList.last().id.plus(1))
+            messageList.add(Message(text = message, senderId = sender.idUser,
+                    recipientId = recipient.idUser, id = messageList.last().id.plus(1)))
         }
-        messageList.add(newMessage)
 
         val messageFilter = messageList.filter { messageIn ->
             messageIn.recipientId == recipient.idUser
         }
-        val chatFilter = chatMap.filterKeys { chatIn ->
-            chatIn.idChat == recipient.idUser
-        }
-        if (chatFilter.isEmpty()) {
-            val newChat = Chat(idChat = recipient.idUser)
-            chatMap.put(newChat, messageFilter)
-        } else {
-            chatMap.forEach { (chatIn, list) ->
-                if (chatIn.idChat == recipient.idUser) chatMap.replace(chatIn, list, messageFilter)
-            }
-        }
+        chatMap
+                .filterKeys { chatIn ->
+                    chatIn.idChat == recipient.idUser
+                }
+                .ifEmpty {
+                    val newChat = Chat(idChat = recipient.idUser)
+                    chatMap.put(newChat, messageFilter)
+                }
+                .let {
+                    chatMap.asSequence()
+                            .forEach { (chatIn, list) ->
+                                if (chatIn.idChat == recipient.idUser) chatMap.replace(chatIn, list, messageFilter)
+                            }
+                }
     }
 
     fun deleteChat(recipient: User) {
@@ -49,21 +52,23 @@ object ChatService {
     }
 
     fun getUnreadChatsCount() {
-        chatMap.map { message ->
+        var count = 0
+        chatMap.forEach { message ->
             message.value.map { messageIn ->
-                if (!messageIn.readOrUnread) println(message.key)
+                if (!messageIn.readOrUnread) count++
             }
         }
+        println("Количество непрочитанных сообщений - $count")
     }
 
     fun getMessageList(idChat: Int) {
         val chatFilter = chatMap.filterKeys { it.idChat == idChat }
         chatFilter.map { message ->
             println("ID чата - ${message.key.idChat}")
+            println("ID последнего сообщения - ${message.value.last().id}")
+            println("Количество сообщений в чате - ${message.value.size}")
             message.value.map { messageIn ->
                 messageIn.readOrUnread = true
-                println("ID последнего сообщения - ${message.value.last().id}")
-                println("количество сообщений в чате - ${message.value.size}")
             }
         }
     }

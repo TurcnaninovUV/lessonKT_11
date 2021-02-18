@@ -8,7 +8,7 @@ fun main() {
     ChatService.sendMessage("sdssds", user1, user2)
     ChatService.sendMessage("123", user1, user2)
     ChatService.sendMessage("098", user3, user4)
-    ChatService.sendMessage("asdasd", user3, user4)
+    ChatService.sendMessage ("asdasd", user3, user4)
 //    ChatService.deleteChat(user1)
 //    ChatService.deleteMessage(2)
 //    ChatService.deleteMessage(1)
